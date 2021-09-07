@@ -94,5 +94,24 @@ public class TwitchClient {
         }
     }
 
+    // Integrate searchTwitch() and getGameList() together.
+    // Send HTTP request to search on Twitch for the top X Games, convert the JSON data to a list of Game,
+    // and return the list of the top X Games
+    public List<Game> topGame(int limit) throws TwitchException {
+        if (limit <= 0) {
+            limit = DEFAULT_GAME_LIMIT;
+        }
+        return getGameList(searchTwitch(buildGameURL(TOP_GAME_URL,"", limit)));
+    }
+
+    // Integrate searchTwitch() and getGameList() together.
+    // Send HTTP request to search on Twitch for the a specific Game.
+    public Game searchGame(String gameName) throws TwitchException {
+        List<Game> gameList = getGameList(searchTwitch(buildGameURL(GAME_SEARCH_URL_TEMPLATE, gameName, 0)));
+        if (gameList.size() != 0) {
+            return gameList.get(0);
+        }
+        return null;
+    }
 
 }

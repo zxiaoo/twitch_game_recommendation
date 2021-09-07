@@ -2,6 +2,8 @@ package com.myProject.twitch_recommendation.servlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myProject.twitch_recommendation.entity.Game;
+import external.TwitchClient;
+import external.TwitchException;
 import org.json.JSONObject;
 
 
@@ -14,25 +16,23 @@ import java.io.IOException;
 public class GameServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        // get gameName from request URL
+        String gameName = request.getParameter("game_name");
+        TwitchClient client = new TwitchClient();
+
         response.setContentType("application/json");
-
-        ObjectMapper mapper = new ObjectMapper();
-
-        Game.Builder builder = new Game.Builder();
-        builder.setName("World of warcraft");
-        builder.setDeveloper("Blizzard Entertainment");
-        builder.setReleaseTime("Feb 11, 2005");
-        builder.setWebsite("https://www.worldofwarcraft.com");
-        builder.setPrice(49.99);
-
-        Game game = builder.build();
-
-        response.getWriter().print(mapper.writeValueAsString(game));
+        try {
+            // return the specific game information if gameName is provided in the request URL
+            // otherwise, return the top X games.
+            if (gameName != null) {
+                response.getWriter().print(new ObjectMapper().writeValueAsString(client.searchGame(gameName)));
+            } else {
+                response.getWriter().print(new ObjectMapper().writeValueAsString(client.topGame(0))); // use default limit
+            }
+        } catch (TwitchException e) {
+            throw new ServletException(e);
+        }
     }
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-
-    }
 }
